@@ -1,0 +1,71 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Managed Stack for AWS SAM CLI",
+    "Outputs": {
+        "SourceBucket": {
+            "Value": {
+                "Ref": "SamCliSourceBucket"
+            }
+        }
+    },
+    "Resources": {
+        "SamCliSourceBucket": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "ManagedStackSource",
+                        "Value": "AwsSamCli"
+                    }
+                ],
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                }
+            },
+            "Type": "AWS::S3::Bucket"
+        },
+        "SamCliSourceBucketBucketPolicy": {
+            "Properties": {
+                "Bucket": {
+                    "Ref": "SamCliSourceBucket"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:GetObject"
+                            ],
+                            "Condition": {
+                                "StringEquals": {
+                                    "aws:SourceAccount": {
+                                        "Ref": "AWS::AccountId"
+                                    }
+                                }
+                            },
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "serverlessrepo.amazonaws.com"
+                            },
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:",
+                                        {
+                                            "Ref": "AWS::Partition"
+                                        },
+                                        ":s3:::",
+                                        {
+                                            "Ref": "SamCliSourceBucket"
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "Type": "AWS::S3::BucketPolicy"
+        }
+    }
+}
